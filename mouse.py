@@ -1,13 +1,16 @@
 import serial, time, pyautogui
 
-arduino = serial.Serial('COM8', 9600)
+cuenta_clicks = 0   #Si es distinto a 0, arrastra el elemento, sino hace un click izquierdo
+
+arduino = serial.Serial('COM4', 9600)   #establece la conexion con arduino
 time.sleep(0.1)
-#pyautogui.moveTo( 300+(300+1000)/5 , 300+(300+1000)/5)
 
 while True:
 
-    clickIzq = arduino.readline()
-    clickDer = arduino.readline()
+    clickIzq = arduino.readline()   #Lee la entrada del boton izquierdo
+    clickDer = arduino.readline()   #Lee la entrada del boton derecho
+
+    #lee las coodenadas x e y del acelerometro
     x = arduino.readline()
     y = arduino.readline()
     
@@ -28,8 +31,11 @@ while True:
     mov_y_menor = 320 - yy
 
 
-    #Reviza si se ha hecho click
-    if cclickIzq == 1:
+    #Reviza si se ha hecho click con algun boton
+    if cclickIzq == 0:
+        cuenta_clicks = 0
+    if cclickIzq == 1 and cuenta_clicks == 0:
+        cuenta_clicks = cuenta_clicks + 1
         pyautogui.click()
     if cclickDer == 1:
         pyautogui.click(button='right')
@@ -38,7 +44,10 @@ while True:
 
     #arriba-derecha
     if xx > 350 and yy > 350:
-        pyautogui.moveRel(mov_x_mayor,mov_y_mayor)
+        if cuenta_clicks != 0:
+            pyautogui.dragRel(mov_x_mayor, mov_y_mayor)
+        else:
+            pyautogui.moveRel(mov_x_mayor,mov_y_mayor)
     #abajo-derecha
     elif xx > 350 and yy < 320:
         pyautogui.moveRel(mov_x_mayor,mov_y_menor)
@@ -56,13 +65,17 @@ while True:
         pyautogui.moveRel(mov_x_menor,0)
     #arriba
     elif yy > 350:
-        pyautogui.moveRel(0,mov_y_mayor)
+        if cuenta_clicks != 0:
+            pyautogui.dragRel(0, mov_y_mayor)
+        else:
+            pyautogui.moveRel(0,mov_y_mayor)
     #abajo
     elif yy < 320:
         pyautogui.moveRel(0,mov_y_menor)
     
 
     
+    clickIzq = ""
     clickDer = ""
     x = ""
     y = ""
